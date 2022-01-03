@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:java="http://www.mulesoft.org/schema/mule/java"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/java http://www.mulesoft.org/schema/mule/java/current/mule-java.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="5ecfc814-1fd4-4ce8-941e-1ccb7f955b8a" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<configuration-properties doc:name="Configuration properties" doc:id="28a73984-e2dd-40ed-b20b-bcf43f9e9886" file="properties\dev.yaml" />
+	<file:config name="writefile" doc:name="File Config" doc:id="be92ad51-6bb4-4edd-a984-016908fddb52" >
+		<file:connection workingDir="C:\Users\suneethar\Writefile" />
+	</file:config>
+	<flow name="assessment3-suneethaFlow" doc:id="a04a95e8-db6a-45a5-b5fa-d70482a8407a" >
+		<http:listener doc:name="Listener" doc:id="6e4289c5-4413-4f7e-bf70-e3d3dc9c8a0e" config-ref="HTTP_Listener_config" path="/assessment3"/>
+		<set-variable value="#[uuid()]" doc:name="Set Variable" doc:id="0da86d64-5cc0-44dc-ba1b-902256484178" variableName="Correlationid"/>
+		<logger level="INFO" doc:name="Logger" doc:id="a7f5c9b6-78ec-403c-a3a4-23ddf379e3cb" message="Correlationid.#[vars.Correlationid]"/>
+		<set-payload value="#[attributes.queryParams.value as Number]" doc:name="Set Payload" doc:id="d14e871c-e407-4243-92d2-847fd5c814dd" />
+		<choice doc:name="Choice" doc:id="e665bb12-ab88-43a9-acdd-9b07478198f0" >
+			<when expression="#[isEven(payload)]">
+				<ee:transform doc:name="Transform Message" doc:id="61dae6e7-31ac-432a-9632-0748e7e52256" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var t=[1,2,3,4,5,6,7,8,9,10]
+
+---
+t map ((item, index) -> attributes.queryParams.value as Number * item )
+	
+	
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<file:write doc:name="Write" doc:id="a5e99991-deae-46a0-be10-02161bf54417" config-ref="writefile" path="sr.txt" mode="APPEND"/>
+				<logger level="INFO" doc:name="Logger" doc:id="98f55112-7cd3-45ec-a0df-ee1b90f68af7" message="#[payload]"/>
+			</when>
+			<otherwise >
+				<java:invoke-static doc:name="Invoke static" doc:id="23d8993b-87a2-48b2-a948-72f2159203d5" method="test(int)" class="suniproject.Sample">
+					<java:args ><![CDATA[#[arg0: attributes.queryParams.value as Number]]]></java:args>
+				</java:invoke-static>
+				<ee:transform doc:name="Transform Message" doc:id="ff432e57-cd3c-414e-abfd-eb90f5b2f31c">
+					<ee:message>
+						<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+				<logger level="INFO" doc:name="Logger" doc:id="bd2aaf44-a733-4031-b18e-09bf90cfac2a" message="Invalid"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

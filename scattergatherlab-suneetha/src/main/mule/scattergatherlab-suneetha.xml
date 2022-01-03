@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="2daa34ee-68a5-4038-9b59-57093718a47d" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<file:config name="writefile" doc:name="File Config" doc:id="7b2de8a1-4a13-4857-9b20-e2d4506d227c" >
+		<file:connection workingDir="C:\Users\suneethar\Writefile" />
+	</file:config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="3dc333c5-6f7f-4564-a25f-991d4c216b4c" >
+		<db:mssql-connection host="${sqldb.host}" port="${sqldb.port}" user="${sqldb.user}" password="${sqldb.password}" databaseName="${sqldb.dbname}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="3a2cf127-fb4a-4e87-9a9d-bd97a667d48b" file="properties\dev.yaml" />
+	<flow name="scattergatherlab-suneethaFlow" doc:id="d42dbcbd-92b7-436d-bcd2-e8504683de93" >
+		<http:listener doc:name="Listener" doc:id="0386fd8c-ef42-4fb6-82f1-f3637cf3d626" config-ref="HTTP_Listener_config" path="/scatterlab"/>
+		<set-payload value="#[attributes.queryParams.value as Number + 5]" doc:name="Set Payload" doc:id="d63c3228-e2cb-4635-abe5-a48532837f47" />
+		<choice doc:name="Choice" doc:id="dfb66ea0-9a74-419d-bc77-299698df5b6a" >
+			<when expression="#[payload &gt; 7]">
+				<scatter-gather doc:name="Scatter-Gather" doc:id="cc93ad40-2d75-4331-b479-6e27f037839a" >
+					<route >
+						<file:write doc:name="Write" doc:id="ec700122-4962-497d-a348-9fee23da6738" config-ref="writefile" path="scatter.txt" mode="APPEND">
+							<file:content ><![CDATA[#["This is info from Scatter router : "]]]></file:content>
+						</file:write>
+					</route>
+					<route >
+						<set-payload value="#[payload]" doc:name="Set Payload" doc:id="e269ebdb-a618-4e25-bfdb-0cf016a94acf" />
+					</route>
+					<route >
+						<db:insert doc:name="Insert" doc:id="21f8f758-d595-4869-b9e7-f4914dd79389" config-ref="Database_Config">
+							<db:sql ><![CDATA[insert into production.categories (category_name) values('SuneethaR')]]></db:sql>
+						</db:insert>
+					</route>
+				</scatter-gather>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="1aaffbfe-4638-4e0f-a90b-dd4baeea53d6" message="Number is lessthan 7"/>
+			</otherwise>
+		</choice>
+		<set-payload value="#[%dw 2.0&#10;output application/json&#10;---&#10;payload]" doc:name="aggregator" doc:id="688a5217-eba4-4adb-a8ac-f261577ad78e" />
+	</flow>
+</mule>

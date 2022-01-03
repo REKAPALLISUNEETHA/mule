@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:os="http://www.mulesoft.org/schema/mule/os" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/os http://www.mulesoft.org/schema/mule/os/current/mule-os.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="94026c25-9de5-486a-aeef-bdde1240dbf2" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<os:object-store name="Object_store" doc:name="Object store" doc:id="f97e25ef-ece1-4b32-be58-02a71b790b75" maxEntries="10" entryTtl="1" entryTtlUnit="MINUTES" expirationInterval="2" />
+	<flow name="objectstore-suneethaFlow" doc:id="64ed17fa-2f90-4931-825f-f86c7196edd5" >
+		<http:listener doc:name="Listener" doc:id="e90073e8-1dca-41a4-affe-c9580abae3c4" config-ref="HTTP_Listener_config" path="/objectstores"/>
+		<os:contains doc:name="Contains" doc:id="f262e972-af92-4f8f-a704-5b8ee8bbc163" key="lastUpdatedTimeKey" objectStore="Object_store" target="lastUpdatedTimeExists"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ac027be7-0068-42a1-9671-79e616b32208" message="#[vars.lastUpdatedTimeExists]"/>
+		<choice doc:name="Choice" doc:id="b1e92300-d7b0-4821-92c6-1bdd512be6d1" >
+			<when expression="#[!vars.lastUpdatedTimeExists]">
+				<os:store doc:name="Store" doc:id="f5239c08-cecd-4682-8e46-61dc2d595fb1" key="lastUpdatedTimeKey" objectStore="Object_store">
+			<os:value><![CDATA[#[now()]]]></os:value>
+		</os:store>
+				<logger level="INFO" doc:name="Logger" doc:id="e6f9c365-8dec-47e0-a55b-0fe654740bd2" message="Object Store Created"/>
+			</when>
+			<otherwise >
+				<logger level="INFO" doc:name="Logger" doc:id="cc90f525-319a-4dc7-ad6b-228fd36e730d" message="Object store Already exists"/>
+				<os:retrieve doc:name="Retrieve" doc:id="84cbb917-37d8-49c1-9312-da8cce6e5468" key="lastUpdatedTimeKey" objectStore="Object_store" target="retrievedTimestamp">
+					<os:default-value ><![CDATA[#[now()]]]></os:default-value>
+				</os:retrieve>
+				<logger level="INFO" doc:name="Logger" doc:id="577525de-6898-47ef-81f4-b745e2cadcec" message="#[vars.retrievedTimestamp]"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

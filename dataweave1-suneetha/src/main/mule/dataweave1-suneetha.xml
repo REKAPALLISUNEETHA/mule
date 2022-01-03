@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="f2b8e8c4-25fe-4c3e-bcc1-d3787f9e5bb4" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="dataweave1-suneethaFlow" doc:id="85460091-0d09-419a-abab-d9a69d49d6fe" >
+		<http:listener doc:name="Listener" doc:id="b8a6590f-f05d-407e-8f45-b9166a02e101" config-ref="HTTP_Listener_config" path="/even"/>
+		<set-payload value="#[1 as Number]" doc:name="Set Payload" doc:id="cccc28c0-a8b7-41dd-acda-c6154a5b4e38" />
+		<choice doc:name="Choice" doc:id="040d18df-d6f6-4a25-8f3c-4eda80406473" >
+			<when expression="#[isEven(payload)]">
+				<ee:transform doc:name="Transform Message" doc:id="1e742d7e-2f79-4509-a926-579deb88916f" >
+					<ee:message >
+						<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	EnteredNumber: "is Even"
+}]]></ee:set-payload>
+					</ee:message>
+				</ee:transform>
+			</when>
+			<otherwise >
+				<set-payload value="number is odd" doc:name="Set Payload" doc:id="3170034e-b634-49a0-bdef-c1fb92b078ce" />
+				<logger level="INFO" doc:name="Logger" doc:id="f424c93f-e459-4b1b-b408-4e476f55e4ce" message="Number is odd"/>
+			</otherwise>
+		</choice>
+	</flow>
+</mule>

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="1d709cb0-f34c-44d0-b7e6-ac84870ae6eb" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="helloworld-suneethaFlow1" doc:id="7d83aa35-7cad-4ce6-a38a-6a7349c7b8ad" >
+	</flow>
+	<flow name="helloworld-suneethaFlow2" doc:id="7b67a73d-e67d-4453-93c3-1898dd9694b1" >
+	</flow>
+	<flow name="helloworld-suneethaFlow" doc:id="da3693dc-bc0a-4701-a80a-ef9a531ec393" >
+		<http:listener doc:name="/helloworld" doc:id="8bc4faf5-ab87-406e-83a9-3ba0062637f5" config-ref="HTTP_Listener_config" path="/helloworld"/>
+		<set-variable value="#[uuid()]" doc:name="Correlationid" doc:id="1124bef6-caea-4729-bac6-da6389b1e40d" variableName="Correlationid" />
+		<logger level="INFO" doc:name="Logging payload" doc:id="8a60748c-4ce0-47d9-ab0b-f1289f26c67b" message="#[payload]" />
+		<set-payload value="Hello World!" doc:name="hello world" doc:id="cdabb415-597b-4b12-a1cd-555ca721b491" />
+		<logger level="INFO" doc:name="diaplaying payload" doc:id="25d7ab58-aa3b-4177-928e-df8a3ac5f65b" message="CorrelationId #[vars.corelationid] - #[payload]"/>
+	</flow>
+</mule>

@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<domain:mule-domain
+	xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:domain="http://www.mulesoft.org/schema/mule/ee/domain"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xsi:schemaLocation="
+               http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+               http://www.mulesoft.org/schema/mule/ee/domain http://www.mulesoft.org/schema/mule/ee/domain/current/mule-domain-ee.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config
+		name="domainHTTP_Listener_config" doc:name="HTTP Listener config"
+		doc:id="715d392b-daa8-4f92-a7e5-6da2ef778925">
+		<http:listener-connection host="0.0.0.0"
+			port="8085" />
+	</http:listener-config>
+	<db:config name="domainDatabase_Config"
+		doc:name="Database Config"
+		doc:id="39784ccd-5f29-4695-aa55-5c7bfc942ff3">
+		<db:mssql-connection host="${sqldb.host}"
+			port="${sqldb.port}" user="${sqldb.user}"
+			password="${secure::sqldb.password}" databaseName="${sqldb.dbname}" />
+	</db:config>
+	<configuration-properties
+		doc:name="Configuration properties"
+		doc:id="a2ca5a55-5b4b-4a14-843b-e202a00bcfff"
+		file="properties\dev.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="727bf6b2-9c56-4e8d-af1b-d2b3c15dcb25" file="properties\dev.yaml" key="mulesoft@1234567" />
+	<!-- configure here resource to be shared within the domain -->
+
+
+</domain:mule-domain>

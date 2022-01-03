@@ -1,0 +1,12 @@
+sqldb:
+  host: ''
+  port: ''
+  user: ''
+  password: ''
+  dbname: ''
+oracledb:
+  host: ''
+  port: ''
+  user: ''
+  password: ''
+  dbname: ''

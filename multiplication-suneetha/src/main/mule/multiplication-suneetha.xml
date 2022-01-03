@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="6a6ee8cd-82c5-42a2-9dd8-753c53fd26b6" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:listener-config name="HTTP_Listener_config1" doc:name="HTTP Listener config" doc:id="f68743b5-7ef9-451a-b7c0-f8c4173284ae" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="multiplication-suneethaFlow" doc:id="843338b2-46b2-4902-b799-d5e6672398c4" >
+		<http:listener doc:name="Listener" doc:id="2d8294bc-6eb4-476e-8792-36e3f21e497e" config-ref="HTTP_Listener_config1" path="/multiplication"/>
+		<ee:transform doc:name="Transform Message" doc:id="9dafb717-5281-4b46-a7e2-3c00abb4e089">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"resultofmultiplication": (attributes.queryParams.q1 as Number )*(attributes.queryParams.q2 as Number )*(attributes.queryParams.q3 as Number )
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="0bbf4675-333b-4fcf-b7d4-8e5411a859f0" message="end logger"/>
+	</flow>
+</mule>

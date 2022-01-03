@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="5f35f590-3342-4837-bf37-64e823ca3d6f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="9ecda8d3-42ce-428e-acee-dd3a16d02cef" >
+		<http:request-connection host="addition-papi.us-e2.cloudhub.io" />
+	</http:request-config>
+	<flow name="untillsuccssful-suneethaFlow" doc:id="844640d4-2aed-4e8f-8e00-e482ba1f28a9" >
+		<http:listener doc:name="Listener" doc:id="08ac6b71-0cce-4be3-82ea-737403795736" config-ref="HTTP_Listener_config" path="/unsuccess"/>
+		<ee:transform doc:name="Transform Message" doc:id="8a316858-a88d-484d-a8a9-db11e7486a9e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message":"hi welcome"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<until-successful maxRetries="3" doc:name="Until Successful" doc:id="29c91531-ecda-4b3f-82ed-907aa003d0a8" millisBetweenRetries="10000">
+			<http:request method="POST" doc:name="Request" doc:id="2bd47555-4e4e-4fb8-81ba-8e2713ccf44e" config-ref="HTTP_Request_configuration" path="/add" />
+		</until-successful>
+		<logger level="INFO" doc:name="Logger" doc:id="95375a27-3215-447b-90c9-4d40397b80c0" message="#[payload]"/>
+	</flow>
+</mule>

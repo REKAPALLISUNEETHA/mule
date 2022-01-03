@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="652fb565-0b88-4c04-a5e7-678d6a6ce89f" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="taskifelse-suneethaFlow" doc:id="2cdbaae9-46ad-472c-a3bd-53ac53be1cc4" >
+		<http:listener doc:name="Listener" doc:id="36259c1b-0a78-40bc-b4e3-323d96676881" config-ref="HTTP_Listener_config" path="/ifelse"/>
+		<http:request method="GET" doc:name="Request" doc:id="c6b9e406-ec1a-4b18-a174-1c6b04d4a871" url="https://api.openweathermap.org/data/2.5/weather?q=delhi&amp;appid=a221a11f7274f6255d8e8648f14cc328"/>
+		<ee:transform doc:name="Transform Message" doc:id="dc2d89a9-7465-4d46-ab6e-90d6e28b561e" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"Max temp":payload.main.temp_max -273.15 ++ " " ++ "Celsious",
+"Min temp":payload.main.temp_min -273.15 ++ " " ++ "Celsious"
+}
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="taskifelse-suneethaFlow1" doc:id="93f1e2f5-3096-4bb4-b7bd-b0ae536c2ada" >
+		<http:listener doc:name="Listener" doc:id="e85c70dd-eb41-4fdc-bc70-8d1ffdf9c1a2" config-ref="HTTP_Listener_config" path="/task2"/>
+		<ee:transform doc:name="Transform Message" doc:id="e101305e-c199-421f-a644-87a20e59700d" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+"address1": payload.order.buyer.address,
+ "city":payload.order.buyer.city,
+ "country" :payload.order.buyer.nationality,
+ "email": payload.order.buyer.email,
+ "name": payload.order.buyer.name,
+ "postalcode" :payload.order.buyer.postcode,
+ "stateorprovence":payload.order.buyer.state
+}
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

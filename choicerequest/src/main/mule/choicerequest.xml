@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="4bd81020-b74d-477d-b56e-c51247009044" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="da7e01f0-1f59-4c18-9885-a20101bb0791" >
+		<http:request-connection host="choicerouter1.us-e2.cloudhub.io" />
+	</http:request-config>
+	<flow name="choicerequestFlow" doc:id="f466f951-8bac-4f46-8a73-318966ea326c" >
+		<http:listener doc:name="Listener" doc:id="a042bbb4-3215-4bd6-ab7b-53f8e3ef5d24" config-ref="HTTP_Listener_config" path="/choicerequest"/>
+		<set-variable value="#[uuid()]" doc:name="Set Variable" doc:id="9e47097d-d559-40f6-9620-1a9549602332" variableName="Correlationid"/>
+		<logger level="INFO" doc:name="variable Logger" doc:id="eb563dc8-69a9-4f0c-ab26-4c7db24d7f92" message="Correlationid - #[vars.Correlationid]--suneetha"/>
+		<http:request method="POST" doc:name="Request" doc:id="cd033cfd-23a1-498c-b9fc-90f1cb734fac" config-ref="HTTP_Request_configuration" path="/choicerouter" outputMimeType="application/json" correlationId="Correlationid">
+			<http:headers ><![CDATA[#[output application/java
+---
+{
+	Correlationid : vars.Correlationid
+}]]]></http:headers>
+		</http:request>
+		<logger level="INFO" doc:name="request Logger" doc:id="cbaebbdc-6db9-40e1-bff2-02078691b8a7" message="#[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="e0213856-7732-4f71-9a15-44255b128293" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="request Logger" doc:id="af172db6-6129-4e70-a487-741d0f65fa55" message="Correlationid-#[vars.Correlationid] - responce received - #[vars.responce] --hi suneetha"/>
+	</flow>
+</mule>

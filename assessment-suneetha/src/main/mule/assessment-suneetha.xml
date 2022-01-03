@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="abc203f4-b894-4a6d-b19e-3353632a4d9e" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="assessment-suneethaFlow" doc:id="f4e626fd-3d65-401e-bc62-10de5b7bf0e6" >
+		<http:listener doc:name="/assessment" doc:id="60317943-2c3b-4203-b670-08f1b1e5f858" config-ref="HTTP_Listener_config" path="/assessment"/>
+		<set-variable value="#[uuid()]" doc:name="Correlationid" doc:id="91f19bee-69a6-4f09-aad0-13c68ea4aad0" variableName="Correlationid"/>
+		<logger level="INFO" doc:name="Logger variable" doc:id="78568122-c124-47d9-a813-b699e1f48ace" message="Correlationid #[vars.correlationid]"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ada6365c-d89d-4db6-a8c8-51d9b278cfe7" message="Correlationid #[vars.Correlationid] -reciived payload - #[payload]"/>
+		<ee:transform doc:name="Transform Message" doc:id="477fd4de-ae97-4513-a798-701874a840eb">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+---
+{
+	root:payload
+}]]></ee:set-payload>
+			</ee:message>
+			<ee:variables >
+				<ee:set-variable variableName="counter" ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	
+	"counter":"1"
+
+}]]></ee:set-variable>
+			</ee:variables>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="749da383-9ada-4a91-81a1-43206cca2f31" message="Correlationid #[vars.Correlationid] -reciived payload - #[payload]"/>
+	</flow>
+</mule>

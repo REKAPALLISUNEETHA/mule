@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:wsc="http://www.mulesoft.org/schema/mule/wsc"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/wsc http://www.mulesoft.org/schema/mule/wsc/current/mule-wsc.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="df0916bf-53f7-428e-80cc-cd6c08478d69" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<wsc:config name="Web_Service_Consumer_Config" doc:name="Web Service Consumer Config" doc:id="b8e39df6-8285-40ef-9ac2-cf0730d7a394" >
+		<wsc:connection wsdlLocation="https://www.dataaccess.com/webservicesserver/NumberConversion.wso?WSDL" service="NumberConversion" port="NumberConversionSoap12" address="https://www.dataaccess.com/webservicesserver/NumberConversion.wso" />
+	</wsc:config>
+	<flow name="soap2-suneethaFlow" doc:id="7ffa330b-9a1c-4a49-8f2d-2d61fb07b10c" >
+		<http:listener doc:name="Listener" doc:id="e96baac2-7378-4460-86fc-90db27edc34f" config-ref="HTTP_Listener_config" path="/soap2"/>
+		<ee:transform doc:name="Transform Message" doc:id="ae7d7da0-1b77-4b71-bee0-09a9f8661d97">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+ns ns0 http://www.dataaccess.com/webservicesserver/
+---
+{
+	ns0#NumberToDollars: {
+		ns0#dNum: payload.value
+	}
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<wsc:consume operation="NumberToDollars" doc:name="Consume" doc:id="4944e7a8-7077-4985-bb72-4e5d5187b2e2" config-ref="Web_Service_Consumer_Config"/>
+		<ee:transform doc:name="Transform Message" doc:id="8dfa3776-a98d-405b-82a6-31fdbb35270e">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0ns ns0 http://www.dataaccess.com/webservicesserver/
+
+output application/json
+---
+{
+	"result":payload.body.ns0#NumberToDollarsResponse
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

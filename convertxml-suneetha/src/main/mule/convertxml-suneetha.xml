@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="bb2f4d21-759f-4e34-946c-5d4432d33732" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="convertxml-suneethaFlow" doc:id="3195f002-b2e7-406e-bdd4-d58152b68ad6" >
+		<http:listener doc:name="Listener" doc:id="ed244432-9ee9-4594-932c-4666aff9fb22" config-ref="HTTP_Listener_config" path="/xml"/>
+		<ee:transform doc:name="Transform Message" doc:id="66576979-f538-4282-ae05-c25d93b17ad4" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+var name = payload.name
+var lastname = payload.LastName
+var profession = payload.Profession
+
+---
+ [
+name,
+lastname,
+profession
+
+]
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+	<flow name="convertxml-suneethaFlow1" doc:id="01ec701b-ca6b-4d43-a396-e07ffd7ecbe6" >
+		<http:listener doc:name="Listener" doc:id="bd36f81a-4444-4103-97e2-7701fcbdf317" config-ref="HTTP_Listener_config" path="/task3"/>
+		<ee:transform doc:name="Transform Message" doc:id="f7f18375-68cb-4756-a0a9-915c29e8e7a2">
+			<ee:message>
+				<ee:set-payload><![CDATA[%dw 2.0
+output application/xml
+var name = payload
+---
+{
+ root:payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+	</flow>
+</mule>

@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e01950c4-fced-4872-acde-499cce3ec185" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<http:request-config name="HTTP_Request_configuration" doc:name="HTTP Request configuration" doc:id="0c6a9f58-8862-4f85-a69f-769c017bb53b" >
+		<http:request-connection host="addition-papi.us-e2.cloudhub.io" />
+	</http:request-config>
+	<flow name="addrequest-suneethaFlow" doc:id="98e4f3a6-dc67-4953-864a-d6b7ca49330b" >
+		<http:listener doc:name="Listener" doc:id="fc81f1c6-7d02-4d64-b91c-429c01ca1751" config-ref="HTTP_Listener_config" path="/addition"/>
+		<set-variable value="#[uuid()]" doc:name="Set Variable" doc:id="ee6c315f-7090-4440-8416-d2a2c74918d0" variableName="Correlationid"/>
+		<logger level="INFO" doc:name="variable Logger" doc:id="67ef0df5-52dc-46c1-bb58-3aa440212443" message="Correlationid - #[vars.Correlationid]"/>
+		<http:request method="POST" doc:name="Request" doc:id="f429c9b7-be79-4b75-8b9c-91b2e87b548a" config-ref="HTTP_Request_configuration" path="/add"/>
+		<ee:transform doc:name="Transform Message" doc:id="e3af797a-0e43-4518-b4d3-190e88a9da3b" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	root:payload
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="d2300707-e61e-4554-9705-35cb0ca67a26" message="Correlationid-#[vars.Correlationid] - responce received"/>
+	</flow>
+</mule>

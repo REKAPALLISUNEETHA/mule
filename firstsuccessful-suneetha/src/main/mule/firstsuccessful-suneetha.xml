@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core" xmlns:http="http://www.mulesoft.org/schema/mule/http"
+	xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="12d61ea5-843c-4379-9487-4decc3a23733" >
+		<http:listener-connection host="0.0.0.0" port="8081" />
+	</http:listener-config>
+	<flow name="firstsuccessful-suneethaFlow" doc:id="9e28deea-e32c-42bd-962b-034784b47bec" >
+		<http:listener doc:name="Listener" doc:id="659ae7e7-4d67-489c-92a5-e16303f14f26" config-ref="HTTP_Listener_config" path="/firstsuccess"/>
+		<logger level="INFO" doc:name="Logger" doc:id="e6a88804-3c8b-4cf4-a6f7-55fd85555d04" message="startinglogger"/>
+		<ee:transform doc:name="Transform Message" doc:id="b0a80dd4-598e-46ed-bfcf-91846ccb0bc7" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+{
+	"message": "welcome"
+}]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<first-successful doc:name="First Successful" doc:id="519369d9-1ee8-45ba-93c8-1d31df9d4750" >
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="240ce92a-803a-4387-b33d-c87d889e35ea" message="route1"/>
+				<raise-error doc:name="Raise error" doc:id="90c2eecf-a0f0-47fb-8c4c-5d8d4ce974ad" type="ANY"/>
+			</route>
+			<route >
+				<logger level="INFO" doc:name="Logger" doc:id="009558b3-2a43-40c5-9807-436aad633204" message="route2"/>
+			</route>
+		</first-successful>
+		<logger level="INFO" doc:name="Logger" doc:id="527a2fc3-9ac2-40d0-a4ed-74560a007592" message="End logger"/>
+	</flow>
+</mule>

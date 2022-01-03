@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:secure-properties="http://www.mulesoft.org/schema/mule/secure-properties" xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:db="http://www.mulesoft.org/schema/mule/db"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/secure-properties http://www.mulesoft.org/schema/mule/secure-properties/current/mule-secure-properties.xsd">
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="16f5c563-294b-4cf8-ba5d-a05484cd60e9" >
+		<http:listener-connection host="0.0.0.0" port="${http.port}" />
+	</http:listener-config>
+	<db:config name="Database_Config" doc:name="Database Config" doc:id="bb26cb35-7df1-47e2-9b09-eb6922568df9" >
+		<db:mssql-connection host="${sqldb.host}" port="${sqldb.port}" user="${sqldb.user}" password="${secure::sqldb.password}" databaseName="${sqldb.dbname}" />
+	</db:config>
+	<configuration-properties doc:name="Configuration properties" doc:id="ba58933a-5221-4a77-97d2-861b8713b757" file="properties\dev.yaml" />
+	<secure-properties:config name="Secure_Properties_Config" doc:name="Secure Properties Config" doc:id="21bc68b7-7651-4f4e-81fe-1b056d38fa48" file="properties\dev.yaml" key="mulesoft@1234567" />
+	<flow name="sqlconnect-suneethaFlow" doc:id="e9c9369d-9a0e-4196-810e-12bcf7898f93" >
+		<http:listener doc:name="Listener" doc:id="9666cc79-0089-44d6-ab99-a5cff0769888" config-ref="HTTP_Listener_config" path="/database"/>
+		<db:select doc:name="Select" doc:id="29fd1b75-e39f-48a5-a8c0-d9789dc0144b" config-ref="Database_Config">
+			<db:sql ><![CDATA[select * from production.categories]]></db:sql>
+		</db:select>
+		<ee:transform doc:name="Transform Message" doc:id="b813c567-5877-4123-a26c-642e5ecba557" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+ payload]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="e5ddc2b7-e332-4356-bc40-6135cd72e311" message="#[payload]"/>
+	</flow>
+	<flow name="sqlconnect-suneethaFlow1" doc:id="59101951-8a90-4337-9a08-658a52e54396" >
+		<http:listener doc:name="Listener" doc:id="babb73c5-87e7-4f9e-8779-c0b7535ededa" config-ref="HTTP_Listener_config" path="/insert"/>
+		<db:insert doc:name="Insert" doc:id="72a43ab3-84b2-4fdf-926b-1b3d479ae4f6" config-ref="Database_Config">
+			<db:sql ><![CDATA[insert into production.categories (category_name) values(:value)]]></db:sql>
+			<db:input-parameters ><![CDATA[#[{
+  value: attributes.queryParams.category_name default 'Suneethar'
+  }]]]></db:input-parameters>
+		</db:insert>
+		<ee:transform doc:name="Transform Message" doc:id="72f38189-6155-4cfa-b8a2-5ed7e4264bb8" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload
+]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="af81ea41-801d-4f26-8bd2-2033c58e18b2" message="#[payload]"/>
+	</flow>
+	<flow name="sqlconnect-suneethaFlow2" doc:id="b8dae39a-a89b-4eea-a197-af0420ea23ad" >
+		<db:listener table="production.categories" doc:name="On Table Row" doc:id="e1bcf551-387e-40f9-a380-a3c6d600e7c3" config-ref="Database_Config" watermarkColumn="category_id">
+			<scheduling-strategy >
+				<fixed-frequency frequency="10" timeUnit="SECONDS" />
+			</scheduling-strategy>
+		</db:listener>
+		<logger level="INFO" doc:name="Logger" doc:id="1cf73dc9-d21f-42fa-af1e-a0e1de56813d" message="#[payload]"/>
+	</flow>
+</mule>
